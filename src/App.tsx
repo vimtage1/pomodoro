@@ -1,20 +1,16 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 export function App() {
-  const initialTime = 25
-  // const timeInSeconds = 10
-  const timeInSeconds = 60 * initialTime
+  const timeInSeconds = 30
   const [time, setTime] = useState(timeInSeconds)
   const [isRunning, setIsRunning] = useState(false)
-  const [counter, setCounter] = useState(0)
+  const [pomodoroCounter, setPomodoroCounter] = useState(0)
 
-  const audio = new Audio('../alert.m4a')
+  const timerWorkerRef = useRef<Worker | null>(null)
 
-  const displayedTime = `${formatNumbers(Math.trunc(time/60))}:${(formatNumbers(time%60))}`
+  // const audio = new Audio('../alert.m4a')
 
-  function toggleClock() {
-    setIsRunning(!isRunning)
-  }
+  const displayedTime = (time: number) => `${formatNumbers(Math.trunc(time/60))}:${(formatNumbers(time%60))}`
 
   function reset() {
     setTime(timeInSeconds)
@@ -30,23 +26,36 @@ export function App() {
     return n
   }
 
-  function tickTimer() {
-    if(isRunning) {
-      setTimeout(() => {
-        setTime(prev => prev - 1)
-        document.title = displayedTime
-        if(time < 2) {
-          setIsRunning(false)
-          setCounter(prev => prev + 1)
-          // audio.play()
-        }
-      }, 1000)
-    }
+  const startTimer = () => {
+    timerWorkerRef.current?.postMessage({ type: 'start', payload: { time } })
+    setIsRunning(true)
+  }
+
+  const stopTimer = () => {
+    timerWorkerRef.current?.postMessage({ type: 'stop' })
+    setIsRunning(false)
   }
 
   useEffect(() => {
-    tickTimer()
-  }, [isRunning, time])
+    timerWorkerRef.current = new Worker('./TimerWorker.ts')
+
+    timerWorkerRef.current.onmessage = function (e: MessageEvent) {
+      const { type, time } = e.data
+
+      switch(type) {
+        case 'tick':
+          setTime(time)
+          document.title = time.toString()
+          break
+        default:
+          break
+      }
+    }
+    
+    return () => {
+      timerWorkerRef.current?.terminate()
+    }
+  }, [])
 
   return (
     <div className="w-screen h-screen flex flex-col justify-center items-center">
@@ -54,9 +63,14 @@ export function App() {
 
       <div className="flex flex-col items-center gap-4">
         {/* <p>{`${formatNumbers(Math.trunc(time/60))}:${(formatNumbers(time%60))}`}</p> */}
-        <p className="mt-4 text-2xl font-bold">{displayedTime}</p>
-        <p className="text-lg font-semibold">#{counter}</p>
-        <button className="bg-green-600 text-white font-semibold px-8 py-2 rounded-lg" onClick={toggleClock}>{isRunning ? 'Stop' : 'Start'}</button>
+        <p className="mt-4 text-2xl font-bold">{displayedTime(time)}</p>
+        <p className="text-lg font-semibold">#{pomodoroCounter}</p>
+        {
+          isRunning ?
+            <button className="bg-red-600 text-white font-semibold px-8 py-2 rounded-lg" onClick={stopTimer}>Stop</button>
+            :
+            <button className="bg-green-600 text-white font-semibold px-8 py-2 rounded-lg" onClick={startTimer}>Start</button>
+        }
       </div>
 
       <button className="mt-8 bg-blue-600 text-white font-semibold px-8 py-2 rounded-lg" onClick={reset}>reset</button>
