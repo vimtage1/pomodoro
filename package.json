@@ -1,5 +1,6 @@
 {
   "name": "pomodoro",
+  "homepage": "https://vimtage1.github.io/pomodoro",
   "private": true,
   "version": "0.0.0",
   "type": "module",
