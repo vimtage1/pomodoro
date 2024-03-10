@@ -3,17 +3,20 @@ let time = 0;
 let isRunning = false;
 let timerInterval = 0
 
+function tick() {
+  postMessage({ type: 'tick', time: --time });
+}
 
-function tickTimer(isInterval) {
+function timer(isInterval) {
   if (isRunning) {
     timerInterval = setInterval(() => {
-      postMessage({ type: 'tick', time: --time });
+      tick()
       if (time <= 0) {
         clearInterval(timerInterval);
         if(isInterval) 
-          postMessage({ type: 'finish' })
+          postMessage({ type: 'complete rest time' })
         else
-          postMessage({ type: 'complete' });
+          postMessage({ type: 'complete work time' });
       }
     }, 1000);
   }
@@ -25,7 +28,7 @@ onmessage = function (e) {
     case 'start':
       time = payload.time;
       isRunning = true;
-      tickTimer(payload.isInterval);
+      timer(payload.isInterval);
       break;
     case 'stop':
       clearInterval(timerInterval);

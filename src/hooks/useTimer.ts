@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react"
 import { formatToTwoDigits } from "../utils/formatToTwoDigits"
 
 export function useTimer() {
-    const timeInSeconds = 3
-    const restTimeInSeconds = 2
+    const timeInSeconds = 10
+    const restTimeInSeconds = 5
     const [isRunning, setIsRunning] = useState(false)
     const timerWorkerRef = useRef<Worker | null>(null)
 
@@ -21,15 +21,34 @@ export function useTimer() {
         document.title = timeInSeconds.toString()
     }
 
-    const startTimer = () => {
+    function completWork() {
+        setIsInterval(true)
+        setIsRunning(false)
+        setTime(restTimeInSeconds)
+    }
+
+    function completeRest() {
+        setPomodoroCounter(prev => prev + 1)
+        setIsInterval(false)
+        setIsRunning(false)
+        setTime(timeInSeconds)
+    }
+
+    function skipTime() {
+        stopTimer()
+        if(isInterval) completeRest()
+        else completWork()
+    }
+
+    function startTimer() {
         timerWorkerRef.current?.postMessage({ type: 'start', payload: {
-            time: isInterval ? restTimeInSeconds : time,
+            time,
             isInterval
         }})
         setIsRunning(true)
     }
 
-    const stopTimer = () => {
+    function stopTimer() {
         timerWorkerRef.current?.postMessage({ type: 'stop' })
         setIsRunning(false)
     }
@@ -45,16 +64,18 @@ export function useTimer() {
                     setTime(time)
                     document.title = time.toString()
                     break
-                case 'complete':
-                    setIsInterval(true)
-                    setIsRunning(false)
-                    setTime(restTimeInSeconds)
+                case 'complete work time':
+                    completWork()
+                    // setIsInterval(true)
+                    // setIsRunning(false)
+                    // setTime(restTimeInSeconds)
                     break
-                case 'finish':
-                    setPomodoroCounter(prev => prev + 1)
-                    setIsInterval(false)
-                    setIsRunning(false)
-                    setTime(timeInSeconds)
+                case 'complete rest time':
+                    completeRest()
+                    // setPomodoroCounter(prev => prev + 1)
+                    // setIsInterval(false)
+                    // setIsRunning(false)
+                    // setTime(timeInSeconds)
                     break
                 default:
                     break
@@ -74,6 +95,8 @@ export function useTimer() {
         displayedTime,
         pomodoroCounter,
         isRunning,
+        isInterval,
+        skipTime
     }
 
 }
