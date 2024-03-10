@@ -20,6 +20,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "public/TimerWorker.ts"],
+  "include": ["src", "public/TimerWorker.js"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
