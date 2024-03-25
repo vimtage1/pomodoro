@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from "react"
 import { formatToTwoDigits } from "../utils/formatToTwoDigits"
 
+const WORK_TIME = 60 * 50 // time in minutes
+const REST_TIME = 60 * 10 // time in minutes
+
 export function useTimer() {
-    const timeInSeconds = 10
-    const restTimeInSeconds = 5
     const [isRunning, setIsRunning] = useState(false)
     const timerWorkerRef = useRef<Worker | null>(null)
 
     const [isInterval, setIsInterval] = useState(false)
-    const [time, setTime] = useState(isInterval ? restTimeInSeconds : timeInSeconds)
+    const [time, setTime] = useState(isInterval ? REST_TIME : WORK_TIME)
 
     const [pomodoroCounter, setPomodoroCounter] = useState(0)
 
@@ -17,23 +18,21 @@ export function useTimer() {
     const displayedTime = (time: number) => `${formatToTwoDigits(Math.trunc(time / 60))}:${(formatToTwoDigits(time % 60))}`
 
     function reset() {
-        setTime(timeInSeconds)
-        document.title = timeInSeconds.toString()
+        setTime(WORK_TIME)
+        document.title = WORK_TIME.toString()
     }
 
     function completWork() {
         setIsInterval(true)
         setIsRunning(false)
-        setTime(restTimeInSeconds)
-        audio.play()
+        setTime(REST_TIME)
     }
 
     function completeRest() {
         setPomodoroCounter(prev => prev + 1)
         setIsInterval(false)
         setIsRunning(false)
-        setTime(timeInSeconds)
-        audio.play()
+        setTime(WORK_TIME)
     }
 
     function skipTime() {
@@ -68,16 +67,11 @@ export function useTimer() {
                     break
                 case 'complete work time':
                     completWork()
-                    // setIsInterval(true)
-                    // setIsRunning(false)
-                    // setTime(restTimeInSeconds)
+                    audio.play()
                     break
                 case 'complete rest time':
                     completeRest()
-                    // setPomodoroCounter(prev => prev + 1)
-                    // setIsInterval(false)
-                    // setIsRunning(false)
-                    // setTime(timeInSeconds)
+                    audio.play()
                     break
                 default:
                     break
