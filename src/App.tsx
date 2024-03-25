@@ -16,7 +16,7 @@ export function App() {
       <div className="mt-8 flex gap-2">
         {
           isRunning ?
-            <button className="bg-red-600 text-white font-semibold px-8 py-2 rounded-lg" onClick={stopTimer}>{'>>'}</button>
+            <button className="bg-red-600 text-white font-semibold px-8 py-2 rounded-lg" onClick={stopTimer}>{'Stop'}</button>
             :
             <button className="bg-green-600 text-white font-semibold px-8 py-2 rounded-lg" onClick={startTimer}>Start</button>
         }

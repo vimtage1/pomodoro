@@ -12,7 +12,7 @@ export function useTimer() {
 
     const [pomodoroCounter, setPomodoroCounter] = useState(0)
 
-    // const audio = new Audio('../alert.m4a')
+    const audio = new Audio('./src/assets/sounds/Alarm09.mp4')
 
     const displayedTime = (time: number) => `${formatToTwoDigits(Math.trunc(time / 60))}:${(formatToTwoDigits(time % 60))}`
 
@@ -25,6 +25,7 @@ export function useTimer() {
         setIsInterval(true)
         setIsRunning(false)
         setTime(restTimeInSeconds)
+        audio.play()
     }
 
     function completeRest() {
@@ -32,6 +33,7 @@ export function useTimer() {
         setIsInterval(false)
         setIsRunning(false)
         setTime(timeInSeconds)
+        audio.play()
     }
 
     function skipTime() {
