@@ -63,7 +63,7 @@ export function useTimer() {
             switch (type) {
                 case 'tick':
                     setTime(time)
-                    document.title = time.toString()
+                    document.title = displayedTime(time)
                     break
                 case 'complete work time':
                     completWork()
