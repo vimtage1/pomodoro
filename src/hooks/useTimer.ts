@@ -1,15 +1,18 @@
-import { useEffect, useRef, useState } from "react"
+import { useState, useRef, useEffect } from 'react'
 import { formatToTwoDigits } from "../utils/formatToTwoDigits"
 
-const WORK_TIME = 60 * 50 // time in minutes
-const REST_TIME = 60 * 10 // time in minutes
+// const WORK_TIME = 60 * 50 // time in minutes
+// const REST_TIME = 60 * 10 // time in minutes
 
 export function useTimer() {
+    const [workTime, setWorkTime] = useState(60 * 50)
+    const [restTime, setRestTime] = useState(60 * 10)
+
     const [isRunning, setIsRunning] = useState(false)
     const timerWorkerRef = useRef<Worker | null>(null)
 
     const [isInterval, setIsInterval] = useState(false)
-    const [time, setTime] = useState(isInterval ? REST_TIME : WORK_TIME)
+    const [time, setTime] = useState(isInterval ? restTime : workTime)
 
     const [pomodoroCounter, setPomodoroCounter] = useState(0)
 
@@ -18,21 +21,21 @@ export function useTimer() {
     const displayedTime = (time: number) => `${formatToTwoDigits(Math.trunc(time / 60))}:${(formatToTwoDigits(time % 60))}`
 
     function reset() {
-        setTime(WORK_TIME)
-        document.title = WORK_TIME.toString()
+        setTime(workTime)
+        document.title = workTime.toString()
     }
 
     function completWork() {
         setIsInterval(true)
         setIsRunning(false)
-        setTime(REST_TIME)
+        setTime(restTime)
     }
 
     function completeRest() {
         setPomodoroCounter(prev => prev + 1)
         setIsInterval(false)
         setIsRunning(false)
-        setTime(WORK_TIME)
+        setTime(workTime)
     }
 
     function skipTime() {
@@ -85,6 +88,7 @@ export function useTimer() {
 
     return {
         time,
+        setTime,
         reset,
         startTimer,
         stopTimer,
@@ -92,7 +96,9 @@ export function useTimer() {
         pomodoroCounter,
         isRunning,
         isInterval,
-        skipTime
+        skipTime,
+        setWorkTime,
+        setRestTime
     }
 
 }
